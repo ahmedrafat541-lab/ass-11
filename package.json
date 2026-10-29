@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index",
-    "start:dev": "nodemon src/index"
+    "start": "cross-env NODE_ENV=production node src/index",
+    "start:dev": "cross-env NODE_ENV=development nodemon src/index"
   },
   "keywords": [],
   "author": "",
@@ -13,14 +13,23 @@
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "concurrently": "^10.0.6",
     "cors": "^2.8.6",
-    "express": "^5.2.1",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.2",
     "google-auth-library": "^11.1.0",
+    "helmet": "^8.3.0",
     "joi": "^18.2.9",
     "jsonwebtoken": "^9.0.3",
+    "limit": "^0.0.1",
     "mongoose": "^9.10.2",
     "multer": "^2.4.0",
     "nodemailer": "^10.2.1",
+    "rate": "^0.1.1",
     "redis": "^6.3.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }

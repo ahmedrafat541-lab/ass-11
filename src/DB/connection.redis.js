@@ -1,21 +1,15 @@
-import { createClient } from "redis"
+import { createClient } from "redis";
+import { REDIS_URL } from "../../config/config.service.js"; // استيراد الرابط من الـ config مباشرة
 
 export const redis_client = createClient({
-  url: "rediss://default:gQAAAAAAA5qYAAIgcDJiNzJkNjI5ZjgxMWM0NGJmYjA0NmRhNDQ2MWU0MmFhNQ@enabled-bunny-236184.upstash.io:6379"
+    url: REDIS_URL
 });
 
-
-export default async function connectionRedis(){
-
-
+export default async function connectionRedis() {
     try {
         await redis_client.connect();
-        console.log("Redis connected successfully")
+        console.log("Redis connected successfully");
     } catch (error) {
-        console.error("Error connecting to Redis:", error)
+        console.error("Error connecting to Redis:", error);
     }
-
-
 }
-
-

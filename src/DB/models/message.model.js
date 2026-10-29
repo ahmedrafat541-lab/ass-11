@@ -7,14 +7,13 @@ const messageSchema = new mongoose.Schema({
 content:{
     type:String,
     required: function(){
-       return this.attachments?length ? false : true
+       return this.attachments?.length ? false : true
     },
     trim:true,
 }
 ,
-attachments:{
-    type:String, 
-},
+
+attachments: [String],
 userId:{
     type:mongoose.Types.ObjectId,
     ref:"User",

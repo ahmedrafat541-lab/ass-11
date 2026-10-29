@@ -1,30 +1,16 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import userModel from "../../DB/models/user.model.js";
 import * as dbservice from "../../DB/service/DB.service.js";
-
+import messageModel from "../../DB/models/message.model.js";
 
 
 
 // const client = new OAuth2Client();
 
 export const createMessage = async (req , res , next)=>{
-
-
-    
     const {content , userId } = req.body ; 
+
+
+    if(!content && !req.files.length) throw new Error("content is required")
 
     const userExist =await dbservice.findById({
         model:userModel,
@@ -36,9 +22,9 @@ export const createMessage = async (req , res , next)=>{
     }
 
     let urls = []
-    if (req?.files?.legth){
+    if (req?.files?.length){
         for(const file of req?.files){
-            urls.push(filepath)
+            urls.push(file.path)
         }
     }
 
@@ -57,7 +43,45 @@ export const createMessage = async (req , res , next)=>{
    return res.status(201).json({message:"done" , message })
 }
 
+
+
+
+
+
+
+export const getMessage = async ( req , res , next) =>{
+
+
+
+    const messages = await dbservice.find({
+        model:messageModel,
+        filter:{
+             userId:req.user._id
+        
+           
+        
+        }
+    })
+    
+   return res.status(201).json({message:"done" , messages  })
+}
  
+
+
+
+
+
+export const getMessageById = async ( req , res , next) =>{
+    const message = await dbservice.findOne({
+        model:messageModel,
+        filter:{
+            _id:req.params.id ,
+            userId:req.user._id
+        }
+    })
+    
+   return res.status(201).json({message:"done" , data: message })
+}
 
 
 

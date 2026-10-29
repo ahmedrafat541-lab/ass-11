@@ -70,7 +70,7 @@ role:{
 enum:Object.values(RoleEnum),
 default:RoleEnum.user
 },
-inConfirmed:{
+isConfirmed:{
     type:Boolean
 },
 //بيحفظ اخر login time للuser

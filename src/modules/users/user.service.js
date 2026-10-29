@@ -19,6 +19,8 @@ import { deleteKey , Keys  } from "../../DB/service/redis.service.js";
 import sendEmail, { generate_otp } from "../../common/service/sendEmail.js";
 import { eventEmitter } from "../../common/utils/event.js";
 import { sendEmailOtp } from "./user.helper.js";
+import { success_response } from "../../common/utils/success.response.js";
+
 
 
 
@@ -36,13 +38,21 @@ export const signUp = async (req , res , next)=>{
     // await dbservice.findOne({ model:userModel , filter: {email:email.toLowerCase()}})
     const hashPassword = hashSync(password , 12)
     // بتسحب الحاجات من ال body
-    // const paths = []
-    // for (const file of req.files.attachments){
-    //     paths.push(file.path)
-    // }
+    const paths = []
+    for (const file of req.files.attachments){
+        paths.push(file.path)
+    }
 
     const otp = await generate_otp()
     const otpHash = hashSync(otp , 12)
+
+
+    
+     await setValue({
+        key:`otp::${email}`,
+        value:otpHash , 
+        ttl:60*20
+    })
 
     eventEmitter.emit("confirm_email" , async ()=>{
 
@@ -54,16 +64,12 @@ export const signUp = async (req , res , next)=>{
     })
 
 
-     await setValue({
-        key:`otp::${email}`,
-        value:otpHash , 
-        ttl:60*20
-    })
  await setValue({
         key:`otp::max::${email}`,
         value:1 , 
         ttl:60*5
     })
+
 
 
 
@@ -82,7 +88,8 @@ export const signUp = async (req , res , next)=>{
               coverImages:paths
              }});
 
-   return res.status(201).json({message:"done" ,user })
+
+   success_response({res, statusCode:201 ,data:user })
 }
 
  
@@ -92,9 +99,11 @@ export const signUp = async (req , res , next)=>{
 export const reSendOtp = async (req , res , next)=>{
     const {email} = req.body
 
-    await sendEmailOtp({email , isConfirmed:false})
+//a77777aaaaaaaaaaaa
+
+    await sendEmailOtp({email , isConfirmed:true})
  
-return res.status(201).json({message:"done" , user})
+return res.status(201).json({message:"done" })
 }
  
 
@@ -270,8 +279,12 @@ export const logout = async (req  ,res , next)=>{
 
     }
     else{
-        await setValue({key:`revoke_token::${req.user._id}::${req.decoded.jti}` , value:`${req.user._id}`,ttl:req.decoded.exp - Math.floor(Date.now() / 1000) })
 
+        await setValue({key:`revoke_token::${req.user._id}::${req.decoded.jti}` ,
+             value:`${req.user._id}`,
+             ttl:req.decoded.exp - Math.floor(Date.now() / 1000) })
+  
+              
         // await dbservice.create({model:revokeTokenModel , data:{
         //     userId:req.user._id , tokenId:req.decoded.jti , expiresAt:new Date(req.decoded.exp * 1000)
         // }})
@@ -281,6 +294,17 @@ export const logout = async (req  ,res , next)=>{
    
     return res.status(200).json({message:"done"})
 };
+
+
+
+
+
+
+
+
+
+
+
 
 
 export const confirmEmail = async (req, res , next)=>{
@@ -298,15 +322,16 @@ export const confirmEmail = async (req, res , next)=>{
     }
 
 
-    const user = await dbservice.findByIdAndUpdate({
+    const user = await dbservice.findOneAndUpdate({
         model:userModel ,
         filter:{
-            email , isconfirmed:{$exists:false}
+            email , isConfirmed:{$exists:false}
         },
         update:{
-            isconfirmed:true
+            isConfirmed:true
         }
     })
+
 
     if(!user){
         throw new Error("user not exist" , {cause:400})
@@ -322,10 +347,16 @@ export const confirmEmail = async (req, res , next)=>{
 
 
 
+
+
+
+
+
+
 export const forgetPassword = async (req, res , next )=> {
     const {email} = req.body
 
-    await sendEmailOtp({email , isConfirmed:true})
+    await sendEmailOtp({email , isConfirmed:true , subject:"forget password"})
 
 
 return res.status(200).json({message:"done"})
@@ -337,17 +368,20 @@ return res.status(200).json({message:"done"})
 
 
 
+
+
+
 export const resetPassword = async (req, res , next )=> {
     const {email , code , password} = req.body
 
    
            const otp = await getValue(`otp::${email}`)
-           if(!otp  ) throw new Error(`you can resend otp after ${otpTTl}`)
+           if(!otp ) throw new Error(`you can resend otp after ${otpTTl}`)
    
 
             if(!compareSync(code , otp))throw new Error("invalid otp")
 
-         const user = await dbservice.findByIdAndUpdate({
+         const user = await dbservice.findOneAndUpdate({
             model:userModel,
                     filter:{
                         email,

@@ -18,10 +18,12 @@ import { shareProfileSchema } from "./user.validation.js";
 import { updateProfileSchema } from "./user.validation.js";
 import {updatePasswordSchema} from "./user.validation.js";
 import { confirmEmailSchema } from "./user.validation.js";
+import messageRouter from "../messages/message.controller.js";
 
-const userRouter = Router();
+const userRouter = Router({strict:true , caseSensitive:true});
 
- 
+
+userRouter.use("/:userId/messages" , messageRouter)
 
 
 

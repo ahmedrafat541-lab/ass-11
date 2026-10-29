@@ -1,8 +1,8 @@
 import { hashSync } from "bcrypt";
 import { eventEmitter } from './../../common/utils/event.js'; 
 import sendEmail , { generate_otp } from "../../common/service/sendEmail.js";
-import { getValue , setValue , ttl ,incr } from "../../DB/service/redis.service.js";
-import { findOne } from "../../DB/service/DB.service.js";
+import { getValue , setValue , ttl ,incr, deleteKey } from "../../DB/service/redis.service.js";
+import * as dbservice from "../../DB/service/DB.service.js";
 import userModel from "../../DB/models/user.model.js";
 
 
@@ -13,16 +13,16 @@ export const sendEmailOtp = async ({email , isConfirmed , subject="confirm Email
         if( isBlocked_ttl > 0){throw new Error(`you blocked you can resend after ${isBlocked_ttl}`)
         }
     
-        if(isBlocked_ttl < 0){
-            if(getValue(`otp::max::${email}`)>=3){
-                await setValue({
-                    key:`otp::max::${email}`,
-                    value:0,
-                    ttl:60*5
-                })
-    
-            }
-        }
+        // if(isBlocked_ttl < 0){
+        //     if(getValue(`otp::max::${email}`)>=3){
+        //         await setValue({
+        //             key:`otp::max::${email}`,
+        //             value:0,
+        //             ttl:60*5
+        //         })
+     
+        //     }
+        // }
     
 
 
@@ -36,6 +36,7 @@ export const sendEmailOtp = async ({email , isConfirmed , subject="confirm Email
                     value:"1",
                     ttl:60*10
                 })
+                await deleteKey(`otp::max::${email}`)
                 throw new Error(`you have axceeded the max numbers`)
             }
 

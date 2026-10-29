@@ -18,8 +18,26 @@ export const findById = async ({model , id , options = {}} = {}) => {
 
 
 export const findByIdAndUpdate = async ({model , id , update , options = {}} = {}) => {
-    return await model.findByIdAndUpdate( id , update , {  new:true , runValidators:true ,  ...options})
+    return await model.findByIdAndUpdate( id , update , {  returnDocument: 'after' , runValidators:true ,  ...options})
 }
+
+
+
+export const findOneAndUpdate = async ({model , filter , update , options = {}} = {}) => {
+    return await model.findOneAndUpdate(filter , update ,{returnDocument: 'after' , runValidators:true    ,  ...options})
+};
+
+
+export const find = async ({model , filter , options = {}} = {})=>{
+    const data = model.find(filter)
+    if(options?.limit)data.limit(options?.limit)
+            if(options?.skip)data.limit(options?.skip)
+    if(options?.sort)data.limit(options?.sort)
+    if(options?.populate)data.limit(options?.populate)
+return data.exec()
+
+            }
+
 
 
 
